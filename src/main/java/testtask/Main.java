@@ -1,5 +1,6 @@
 package testtask;
 
+import gnu.trove.set.hash.THashSet;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -8,15 +9,14 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Objects;
+import java.util.StringTokenizer;
 
 public class Main {
 
-  static ArrayList<HashSet<String>> groups = new ArrayList<>();
+  static ArrayList<THashSet<String>> groups = new ArrayList<>();
   static ArrayList<HashMap<String, Integer>> wordsPositions = new ArrayList<>();
   static HashMap<Integer, Integer> joinedGroups = new HashMap<>();
 
@@ -33,7 +33,7 @@ public class Main {
     groups.removeAll(Collections.singleton(null));
     groups.sort((a, b) -> a.size() < b.size() ? 1 : a.size() > b.size() ? -1 : 0);
     try (Writer writer = new FileWriter("output.txt", StandardCharsets.UTF_8)) {
-      for (HashSet<String> group : groups) {
+      for (THashSet<String> group : groups) {
         if (group == null) {
           continue;
         }
@@ -59,24 +59,13 @@ public class Main {
 
     Integer groupNumber = null;
     ArrayList<Integer> otherGroups = new ArrayList<>();
-    ArrayList<String> parts = new ArrayList<>();
-
-    for (String part : line.split(";")) {
-      if (part.isEmpty()) {
-        parts.add("");
-        continue;
-      }
-      part = part.substring(1, part.length() - 1);
-      if (!part.contains("\"")) {
-        parts.add(part);
-      }
-    }
+    ArrayList<String> parts = lineSplit(line);
 
     for (int i = 0; i < parts.size(); i++) {
       String part = parts.get(i);
 
-      if (wordsPositions.size() <= i) {
-        break;
+      if (wordsPositions.size() == i) {
+        wordsPositions.add(new HashMap<>());
       } else {
         HashMap<String, Integer> position = wordsPositions.get(i);
         if (position.containsKey(part)) {
@@ -94,14 +83,11 @@ public class Main {
     }
 
     if (groupNumber != null) {
-      if (otherGroups.isEmpty()) {
-        HashSet<String> group = groups.get(groupNumber);
-        group.add(line);
-      } else {
-        HashSet<String> group = groups.get(groupNumber);
+      THashSet<String> group = groups.get(groupNumber);
+      if (!otherGroups.isEmpty()) {
         for (Integer num : otherGroups) {
-          if (num != groupNumber) {
-            HashSet<String> groupToMerge = groups.get(num);
+          if (!Objects.equals(num, groupNumber)) {
+            THashSet<String> groupToMerge = groups.get(num);
             if (groupToMerge == null) {
               continue;
             }
@@ -110,33 +96,45 @@ public class Main {
             joinedGroups.put(num, groupNumber);
           }
         }
-        group.add(line);
       }
+      group.add(line);
 
     } else {
       groupNumber = groups.size();
-      HashSet<String> group = new HashSet<>();
+      THashSet<String> group = new THashSet<>();
       group.add(line);
       groups.add(group);
     }
 
     for (int i = 0; i < parts.size(); i++) {
-      if (wordsPositions.size() <= i) {
-        HashMap<String, Integer> position = new HashMap<>();
-        if (parts.get(i).isEmpty()) {
-          wordsPositions.add(position);
-          continue;
-        }
-        position.put(parts.get(i), groupNumber);
-        wordsPositions.add(position);
-      } else {
-        if (parts.get(i).isEmpty()) {
-          continue;
-        }
-        HashMap<String, Integer> position = wordsPositions.get(i);
-        position.put(parts.get(i), groupNumber);
+      HashMap<String, Integer> position = wordsPositions.get(i);
+      if (parts.get(i).isEmpty()) {
+        continue;
       }
+      position.put(parts.get(i), groupNumber);
+      wordsPositions.add(position);
     }
 
   }
+
+  static ArrayList<String> lineSplit(String line) {
+
+    ArrayList<String> parts = new ArrayList<>();
+    StringTokenizer tokenizer = new StringTokenizer(line, ";");
+
+    while (tokenizer.hasMoreTokens()) {
+      String part = tokenizer.nextToken();
+      if (part.isEmpty()) {
+        parts.add("");
+        continue;
+      }
+      part = part.substring(1, part.length() - 1);
+      if (!part.contains("\"")) {
+        parts.add(part);
+      }
+    }
+    return parts;
+  }
+
+
 }
