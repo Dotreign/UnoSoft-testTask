@@ -31,7 +31,7 @@ public class Main {
     int counter = 0;
     int moreThanOneCounter = 0;
     groups.removeAll(Collections.singleton(null));
-    groups.sort((a, b) -> a.size() < b.size() ? 1 : a.size() > b.size() ? -1 : 0);
+    groups.sort((a, b) -> Integer.compare(b.size(), a.size()));
     try (Writer writer = new FileWriter("output.txt", StandardCharsets.UTF_8)) {
       for (THashSet<String> group : groups) {
         if (group == null) {
@@ -107,12 +107,12 @@ public class Main {
     }
 
     for (int i = 0; i < parts.size(); i++) {
-      HashMap<String, Integer> position = wordsPositions.get(i);
+      HashMap<String, Integer> position;
       if (parts.get(i).isEmpty()) {
         continue;
       }
+      position = wordsPositions.get(i);
       position.put(parts.get(i), groupNumber);
-      wordsPositions.add(position);
     }
 
   }
