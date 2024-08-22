@@ -40,8 +40,14 @@ public class Main {
         if (group.size() > 1) {
           moreThanOneCounter += 1;
         }
+      }
+      writer.write(moreThanOneCounter + "\n");
+      for (THashSet<String> group : groups) {
+        if (group == null) {
+          continue;
+        }
         counter += 1;
-        writer.write("Группа " + counter + "\n");
+        writer.write("Group " + counter + "\n");
         for (String line : group) {
           writer.write(line + "\n");
         }
