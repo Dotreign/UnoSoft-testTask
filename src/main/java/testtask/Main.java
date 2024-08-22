@@ -41,7 +41,7 @@ public class Main {
           moreThanOneCounter += 1;
         }
         counter += 1;
-        writer.write("Group " + counter + "\n");
+        writer.write("Группа " + counter + "\n");
         for (String line : group) {
           writer.write(line + "\n");
         }
